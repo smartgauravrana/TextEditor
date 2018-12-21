@@ -1,7 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Editor } from 'slate-react';
 import { Value } from 'slate';
-import {BoldMark, ItalicMark } from './index';
+import {BoldMark, ItalicMark, FormatToolbar } from './index';
+
+import Icon from 'react-icons-kit';
+import { bold } from 'react-icons-kit/feather/bold';
+import { italic } from 'react-icons-kit/feather/italic';
 
 const initialValue = Value.fromJSON({
     document: {
@@ -66,13 +70,37 @@ export default class TextEditor extends Component {
         this.setState({ value });
     }
 
+    onMarkClick = (e, type) => {
+        e.preventDefault();
+
+        const {value} = this.state;
+        console.log(value)
+        const change = value.change().toggleMark(type);
+        this.onChange(change);
+    }
+
     render() {
         return (
-            <Editor 
-                value={this.state.value} 
-                onChange={this.onChange}
-                onKeyDown={this.onKeyDown}
-                renderMark={this.renderMark}/>
+            <Fragment>
+                <FormatToolbar>
+                    <button 
+                        className="tooltip-icon-button"
+                        onPointerDown={(e) => this.onMarkClick(e, 'bold')}>
+                        <Icon icon={bold} />
+                    </button>
+                    <button 
+                        className="tooltip-icon-button"
+                        onPointerDown={(e) => this.onMarkClick(e, 'italic')}>
+                        <Icon icon={italic} />
+                    </button>
+                </FormatToolbar>
+            
+                <Editor 
+                    value={this.state.value} 
+                    onChange={this.onChange}
+                    onKeyDown={this.onKeyDown}
+                    renderMark={this.renderMark}/>
+            </Fragment>
         );
     }
 }
