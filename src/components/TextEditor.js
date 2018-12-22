@@ -1,11 +1,10 @@
 import React, { Component, Fragment } from 'react';
 import { Editor } from 'slate-react';
 import { Value } from 'slate';
-import {BoldMark, ItalicMark, FormatToolbar } from './index';
+import {BoldMark, CodeMark, ItalicMark, FormatToolbar, ListMark, UnderlineMark } from './index';
 
 import Icon from 'react-icons-kit';
-import { bold } from 'react-icons-kit/feather/bold';
-import { italic } from 'react-icons-kit/feather/italic';
+import { bold, italic, code, list, underline } from 'react-icons-kit/feather';
 
 const initialValue = Value.fromJSON({
     document: {
@@ -33,23 +32,37 @@ export default class TextEditor extends Component {
         value: initialValue,
     };
 
-    onKeyDown = (e, change) => {
+    onKeyDown = (e, editor) => {
+        this.editor = editor;
+
         if(!e.ctrlKey) { return ; }
         e.preventDefault();
 
         switch(e.key) {
             case 'b': {
-                change.toggleMark('bold')
+                editor.toggleMark('bold')
                 return true;
             }
 
             case 'i': {
-                change.toggleMark('italic')
+                editor.toggleMark('italic')
                 return true;
             }
 
+            case 'c':
+            editor.toggleMark('code');
+            return true;
+        
+            case 'l':
+                editor.toggleMark('list');
+                return true;
+            
+            case 'u':
+                editor.toggleMark('underline');
+                return true;
+
             default: {
-                return;
+                return true;
             }
         }
 
@@ -62,10 +75,20 @@ export default class TextEditor extends Component {
 
             case 'italic': 
                 return <ItalicMark {...props} />
+
+            case 'code':
+                return <CodeMark {...props} />
+            case 'list':
+                return <ListMark {...props} />
+            case 'underline':
+                return <UnderlineMark {...props} />
+
+            default :
+                return props;
         }
     }
 
-    //On change, update the app's react state with the new editor value
+    //On editor, update the app's react state with the new editor value
     onChange = ({value}) => {
         this.setState({ value });
     }
@@ -73,10 +96,9 @@ export default class TextEditor extends Component {
     onMarkClick = (e, type) => {
         e.preventDefault();
 
-        const {value} = this.state;
-        console.log(value)
-        const change = value.change().toggleMark(type);
-        this.onChange(change);
+        if (this.editor) {
+            this.editor.toggleMark(type);
+        }
     }
 
     render() {
@@ -93,10 +115,28 @@ export default class TextEditor extends Component {
                         onPointerDown={(e) => this.onMarkClick(e, 'italic')}>
                         <Icon icon={italic} />
                     </button>
+                    <button
+                        className="tooltip-icon-button"
+                        onClick={(e) => this.onMarkClick(e, 'code')}
+                    >
+                        <Icon icon={code} />
+                    </button>
+                    <button
+                        className="tooltip-icon-button"
+                        onClick={(e) => this.onMarkClick(e, 'list')}
+                    >
+                        <Icon icon={list} />
+                    </button>
+                    <button
+                        className="tooltip-icon-button"
+                        onClick={(e) => this.onMarkClick(e, 'underline')}
+                    >
+                        <Icon icon={underline} />
+                    </button>
                 </FormatToolbar>
             
                 <Editor 
-                    value={this.state.value} 
+                    value={this.state.value}
                     onChange={this.onChange}
                     onKeyDown={this.onKeyDown}
                     renderMark={this.renderMark}/>
